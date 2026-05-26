@@ -1,0 +1,32 @@
+{
+  "name": "reasons-portal-root",
+  "version": "1.0.0",
+  "description": "Repositorio raíz para el Portal Web Institucional REASONS (Backend + Frontend)",
+  "main": "utils/start-dev.js",
+  "scripts": {
+    "db:init": "node utils/db-init.js",
+    "db:seed": "node utils/db-seed.js",
+    "db:clean": "node utils/db-clean.js",
+    "db:admin": "node utils/create-admin.js",
+    "start:dev": "node utils/start-dev.js",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install"
+  },
+  "keywords": [
+    "reasons",
+    "uta",
+    "mysql",
+    "express",
+    "angular",
+    "tailwind"
+  ],
+  "author": "REASONS Research Group Team",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
+    "mysql2": "^3.9.7"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

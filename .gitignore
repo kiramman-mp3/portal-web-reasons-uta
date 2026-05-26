@@ -1,0 +1,74 @@
+# =========================================================================
+# REASONS - PORTAL WEB INSTITUCIONAL
+# ARCHIVO DE CONFIGURACIÓN DE EXCLUSIONES DE CONTROL DE VERSIONES (GIT)
+# =========================================================================
+
+# -------------------------------------------------------------------------
+# 💻 ARCHIVOS Y DIRECTORIOS DEL SISTEMA OPERATIVO Y LOGS
+# -------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# -------------------------------------------------------------------------
+# 🛡️ ARCHIVOS DE CONFIGURACIÓN LOCAL Y SECRETOS (¡NUNCA SUBIR A PROD/GIT!)
+# -------------------------------------------------------------------------
+.env
+*.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# -------------------------------------------------------------------------
+# 📦 DEPENDENCIAS DEL SISTEMA
+# -------------------------------------------------------------------------
+node_modules/
+/backend/node_modules/
+/frontend/node_modules/
+
+# -------------------------------------------------------------------------
+# ⚙️ ENTORNOS DE DESARROLLO E IDES (VS Code, WebStorm, IntelliJ)
+# -------------------------------------------------------------------------
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+*.swo
+.project
+.classpath
+.settings/
+
+# -------------------------------------------------------------------------
+# 📂 BACKEND: CONTROL DE ARCHIVOS Y MULTIMEDIA SUBIDOS
+# -------------------------------------------------------------------------
+# Ignorar las cargas de archivos en tiempo de ejecución (fotos de investigadores y portadas)
+# El script "npm run db:seed" las recrea automáticamente para desarrollo.
+/backend/uploads/*
+!/backend/uploads/.gitkeep
+
+# -------------------------------------------------------------------------
+# 🎨 FRONTEND: COMPILACIÓN Y CACHÉS DE ANGULAR
+# -------------------------------------------------------------------------
+/frontend/.angular/
+/frontend/dist/
+/frontend/tmp/
+/frontend/out-tsc/
+/frontend/bazel-out/
+/frontend/.sass-cache/
+/frontend/coverage/
+/frontend/typings/
+/frontend/__screenshots__/
+testem.log
