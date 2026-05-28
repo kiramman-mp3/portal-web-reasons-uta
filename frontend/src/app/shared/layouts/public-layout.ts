@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ViewEncapsulation } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ConfigService } from '../../core/services/config.service';
@@ -7,6 +7,7 @@ import { ConfigService } from '../../core/services/config.service';
   selector: 'app-public-layout',
   standalone: true,
   imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
+  encapsulation: ViewEncapsulation.None,
   template: `
     <div class="min-h-screen flex flex-col bg-slate-50">
       
@@ -176,12 +177,228 @@ import { ConfigService } from '../../core/services/config.service';
         </div>
       </footer>
 
+      <!-- WIDGET FLOTANTE DE ACCESIBILIDAD -->
+      <div class="fixed bottom-6 right-6 z-50 font-sans">
+        
+        <!-- Botón Lanzador Principal -->
+        <button (click)="toggleAccessMenu()" 
+                class="w-14 h-14 rounded-full bg-primary hover:bg-primary-hover text-white shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 focus:outline-none cursor-pointer"
+                title="Menú de Accesibilidad"
+                aria-label="Menú de Accesibilidad">
+          <i class="bi bi-universal-access text-3xl"></i>
+        </button>
+
+        <!-- Panel de Opciones de Accesibilidad -->
+        <div *ngIf="isAccessMenuOpen()" 
+             class="absolute bottom-16 right-0 w-80 bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl space-y-5 animate-scale-in flex flex-col text-slate-800">
+          
+          <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+            <div class="flex items-center space-x-2">
+              <i class="bi bi-universal-access text-xl text-primary animate-pulse"></i>
+              <span class="font-extrabold text-xs uppercase tracking-wider text-slate-800">Accesibilidad Web</span>
+            </div>
+            <button (click)="closeAccessMenu()" class="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all cursor-pointer">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+
+          <!-- Tamaño de Texto -->
+          <div class="space-y-2">
+            <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest block">Tamaño del Texto</span>
+            <div class="grid grid-cols-3 gap-2">
+              <button (click)="setTextSize(14)" 
+                      [ngClass]="currentTextSize() === 14 ? 'bg-primary text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                      class="py-2 text-[10px] font-bold rounded-xl transition-all cursor-pointer">
+                A- (Pequeño)
+              </button>
+              <button (click)="setTextSize(16)" 
+                      [ngClass]="currentTextSize() === 16 ? 'bg-primary text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                      class="py-2 text-[10px] font-bold rounded-xl transition-all cursor-pointer">
+                A (Normal)
+              </button>
+              <button (click)="setTextSize(19)" 
+                      [ngClass]="currentTextSize() === 19 ? 'bg-primary text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                      class="py-2 text-[10px] font-bold rounded-xl transition-all cursor-pointer">
+                A+ (Grande)
+              </button>
+            </div>
+          </div>
+
+          <!-- Opciones con Toggles -->
+          <div class="space-y-4 pt-2 border-t border-slate-100/60">
+            
+            <!-- Contraste Alto -->
+            <div class="flex items-center justify-between">
+              <div class="flex flex-col">
+                <span class="text-xs font-bold text-slate-700">Contraste Alto</span>
+                <span class="text-[9px] text-slate-400">Texto amarillo en fondo negro</span>
+              </div>
+              <button (click)="toggleHighContrast()" 
+                      [ngClass]="isHighContrast() ? 'bg-primary text-white' : 'bg-slate-200 text-slate-400'"
+                      class="w-11 h-6 rounded-full relative transition-all cursor-pointer focus:outline-none flex items-center p-0.5">
+                <div [ngClass]="isHighContrast() ? 'translate-x-5' : 'translate-x-0'"
+                     class="w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200"></div>
+              </button>
+            </div>
+
+            <!-- Fuente Accesible -->
+            <div class="flex items-center justify-between">
+              <div class="flex flex-col">
+                <span class="text-xs font-bold text-slate-700">Fuente Accesible</span>
+                <span class="text-[9px] text-slate-400">Separación y tipografía legible</span>
+              </div>
+              <button (click)="toggleDyslexicFont()" 
+                      [ngClass]="isDyslexicFont() ? 'bg-primary text-white' : 'bg-slate-200 text-slate-400'"
+                      class="w-11 h-6 rounded-full relative transition-all cursor-pointer focus:outline-none flex items-center p-0.5">
+                <div [ngClass]="isDyslexicFont() ? 'translate-x-5' : 'translate-x-0'"
+                     class="w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200"></div>
+              </button>
+            </div>
+
+            <!-- Detener Animaciones -->
+            <div class="flex items-center justify-between">
+              <div class="flex flex-col">
+                <span class="text-xs font-bold text-slate-700">Detener Animaciones</span>
+                <span class="text-[9px] text-slate-400">Reduce movimiento de la web</span>
+              </div>
+              <button (click)="toggleReduceMotion()" 
+                      [ngClass]="isReduceMotion() ? 'bg-primary text-white' : 'bg-slate-200 text-slate-400'"
+                      class="w-11 h-6 rounded-full relative transition-all cursor-pointer focus:outline-none flex items-center p-0.5">
+                <div [ngClass]="isReduceMotion() ? 'translate-x-5' : 'translate-x-0'"
+                     class="w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200"></div>
+              </button>
+            </div>
+
+            <!-- Resaltar Enlaces -->
+            <div class="flex items-center justify-between">
+              <div class="flex flex-col">
+                <span class="text-xs font-bold text-slate-700">Destacar Enlaces</span>
+                <span class="text-[9px] text-slate-400">Subraya e ilumina clics</span>
+              </div>
+              <button (click)="toggleHighlightLinks()" 
+                      [ngClass]="isHighlightLinks() ? 'bg-primary text-white' : 'bg-slate-200 text-slate-400'"
+                      class="w-11 h-6 rounded-full relative transition-all cursor-pointer focus:outline-none flex items-center p-0.5">
+                <div [ngClass]="isHighlightLinks() ? 'translate-x-5' : 'translate-x-0'"
+                     class="w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200"></div>
+              </button>
+            </div>
+
+          </div>
+
+          <!-- Restablecer Valores -->
+          <div class="border-t border-slate-100 pt-3 flex justify-between items-center">
+            <span class="text-[9px] text-slate-400 font-semibold">REASONS Portal</span>
+            <button (click)="resetAccessibility()" 
+                    class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-extrabold rounded-lg transition-all cursor-pointer border border-slate-200/50">
+              Restablecer Ajustes
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
     </div>
   `,
   styles: [`
     .active-nav {
       color: var(--color-primary, #0A5C36) !important;
       background-color: var(--color-primary-light, #eaf2ed) !important;
+    }
+    
+    /* ANIMACIONES DEL PANEL DE ACCESIBILIDAD */
+    .animate-scale-in {
+      animation: scaleIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    @keyframes scaleIn {
+      from { transform: scale(0.9) translateY(10px); opacity: 0; }
+      to { transform: scale(1) translateY(0); opacity: 1; }
+    }
+
+    /* ESTILOS GLOBALES DE ACCESIBILIDAD INYECTADOS */
+    body.high-contrast {
+      background-color: #000000 !important;
+      background: #000000 !important;
+      color: #ffffff !important;
+    }
+    body.high-contrast a, 
+    body.high-contrast button, 
+    body.high-contrast span,
+    body.high-contrast h1,
+    body.high-contrast h2,
+    body.high-contrast h3,
+    body.high-contrast h4,
+    body.high-contrast p,
+    body.high-contrast li,
+    body.high-contrast i,
+    body.high-contrast label,
+    body.high-contrast input,
+    body.high-contrast textarea,
+    body.high-contrast td,
+    body.high-contrast th {
+      color: #ffff00 !important;
+    }
+    body.high-contrast .bg-white, 
+    body.high-contrast .bg-slate-50, 
+    body.high-contrast .bg-slate-100, 
+    body.high-contrast .bg-slate-200, 
+    body.high-contrast .bg-slate-900,
+    body.high-contrast .bg-slate-950,
+    body.high-contrast nav,
+    body.high-contrast footer,
+    body.high-contrast section,
+    body.high-contrast div.bg-white,
+    body.high-contrast div.bg-slate-50,
+    body.high-contrast div.bg-slate-100,
+    body.high-contrast div.bg-slate-900,
+    body.high-contrast input,
+    body.high-contrast textarea,
+    body.high-contrast select,
+    body.high-contrast form,
+    body.high-contrast table,
+    body.high-contrast tr,
+    body.high-contrast td {
+      background-color: #000000 !important;
+      background: #000000 !important;
+      border-color: #ffffff !important;
+      box-shadow: none !important;
+    }
+    body.high-contrast border, 
+    body.high-contrast .border-slate-100,
+    body.high-contrast .border-slate-200,
+    body.high-contrast .border-slate-200\/50,
+    body.high-contrast hr {
+      border-color: #ffffff !important;
+    }
+    body.high-contrast button.bg-primary,
+    body.high-contrast a.bg-primary {
+      background-color: #000000 !important;
+      border: 2px solid #ffff00 !important;
+    }
+
+    body.dyslexic-font,
+    body.dyslexic-font * {
+      font-family: 'Arial', 'Helvetica', sans-serif !important;
+      letter-spacing: 0.06em !important;
+      word-spacing: 0.12em !important;
+      line-height: 1.8 !important;
+    }
+
+    body.reduce-motion,
+    body.reduce-motion * {
+      animation: none !important;
+      transition: none !important;
+      transform: none !important;
+    }
+
+    body.highlight-links a, 
+    body.highlight-links button[routerLink],
+    body.highlight-links a[routerLink],
+    body.highlight-links .cursor-pointer {
+      outline: 3px solid #ff5722 !important;
+      background-color: rgba(255, 87, 34, 0.15) !important;
+      text-decoration: underline !important;
+      font-weight: 800 !important;
     }
   `]
 })
@@ -190,11 +407,149 @@ export class PublicLayoutComponent {
   config = inject(ConfigService);
   isMobileMenuOpen = signal(false);
 
+  isAccessMenuOpen = signal(false);
+  currentTextSize = signal(16);
+  isHighContrast = signal(false);
+  isDyslexicFont = signal(false);
+  isReduceMotion = signal(false);
+  isHighlightLinks = signal(false);
+
+  constructor() {
+    this.loadSettings();
+  }
+
   toggleMobileMenu() {
     this.isMobileMenuOpen.update(val => !val);
   }
 
   closeMobileMenu() {
     this.isMobileMenuOpen.set(false);
+  }
+
+  toggleAccessMenu() {
+    this.isAccessMenuOpen.update(val => !val);
+  }
+
+  closeAccessMenu() {
+    this.isAccessMenuOpen.set(false);
+  }
+
+  setTextSize(size: number) {
+    this.currentTextSize.set(size);
+    if (typeof document !== 'undefined') {
+      document.documentElement.style.fontSize = `${size}px`;
+    }
+    this.saveSettings();
+  }
+
+  toggleHighContrast() {
+    this.isHighContrast.update(val => {
+      const next = !val;
+      this.updateBodyClass('high-contrast', next);
+      return next;
+    });
+    this.saveSettings();
+  }
+
+  toggleDyslexicFont() {
+    this.isDyslexicFont.update(val => {
+      const next = !val;
+      this.updateBodyClass('dyslexic-font', next);
+      return next;
+    });
+    this.saveSettings();
+  }
+
+  toggleReduceMotion() {
+    this.isReduceMotion.update(val => {
+      const next = !val;
+      this.updateBodyClass('reduce-motion', next);
+      return next;
+    });
+    this.saveSettings();
+  }
+
+  toggleHighlightLinks() {
+    this.isHighlightLinks.update(val => {
+      const next = !val;
+      this.updateBodyClass('highlight-links', next);
+      return next;
+    });
+    this.saveSettings();
+  }
+
+  resetAccessibility() {
+    this.currentTextSize.set(16);
+    this.isHighContrast.set(false);
+    this.isDyslexicFont.set(false);
+    this.isReduceMotion.set(false);
+    this.isHighlightLinks.set(false);
+
+    if (typeof document !== 'undefined') {
+      document.documentElement.style.fontSize = '';
+      this.updateBodyClass('high-contrast', false);
+      this.updateBodyClass('dyslexic-font', false);
+      this.updateBodyClass('reduce-motion', false);
+      this.updateBodyClass('highlight-links', false);
+    }
+    this.saveSettings();
+  }
+
+  private updateBodyClass(className: string, add: boolean) {
+    if (typeof document !== 'undefined') {
+      if (add) {
+        document.body.classList.add(className);
+      } else {
+        document.body.classList.remove(className);
+      }
+    }
+  }
+
+  private saveSettings() {
+    if (typeof localStorage !== 'undefined') {
+      const settings = {
+        textSize: this.currentTextSize(),
+        highContrast: this.isHighContrast(),
+        dyslexicFont: this.isDyslexicFont(),
+        reduceMotion: this.isReduceMotion(),
+        highlightLinks: this.isHighlightLinks()
+      };
+      localStorage.setItem('reasons_accessibility', JSON.stringify(settings));
+    }
+  }
+
+  private loadSettings() {
+    if (typeof localStorage !== 'undefined') {
+      const saved = localStorage.getItem('reasons_accessibility');
+      if (saved) {
+        try {
+          const settings = JSON.parse(saved);
+          if (settings.textSize) {
+            this.currentTextSize.set(settings.textSize);
+            if (typeof document !== 'undefined') {
+              document.documentElement.style.fontSize = `${settings.textSize}px`;
+            }
+          }
+          if (settings.highContrast) {
+            this.isHighContrast.set(true);
+            this.updateBodyClass('high-contrast', true);
+          }
+          if (settings.dyslexicFont) {
+            this.isDyslexicFont.set(true);
+            this.updateBodyClass('dyslexic-font', true);
+          }
+          if (settings.reduceMotion) {
+            this.isReduceMotion.set(true);
+            this.updateBodyClass('reduce-motion', true);
+          }
+          if (settings.highlightLinks) {
+            this.isHighlightLinks.set(true);
+            this.updateBodyClass('highlight-links', true);
+          }
+        } catch (e) {
+          console.error('Error loading accessibility settings', e);
+        }
+      }
+    }
   }
 }
