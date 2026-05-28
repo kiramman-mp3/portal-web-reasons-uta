@@ -182,3 +182,11 @@ ON DUPLICATE KEY UPDATE id=id;
 INSERT INTO users (id, username, password_hash, role) 
 VALUES (1, 'admin', '$2b$12$N9qo8uLOqp02Y9EP3uqhbeBf3.Y2nN8hT2rC/F7Wn3W39U8jR/P/a', 'admin')
 ON DUPLICATE KEY UPDATE id=id;
+
+-- Inserción inicial de Diapositivas Semilla para el Carrusel del Hero
+INSERT INTO hero_slides (id, image_url, title, subtitle, order_index) VALUES
+(1, 'uploads/hero_reasons.png', 'Investigación Científica con Impacto Real', 'Desarrollamos soluciones tecnológicas aplicadas para resolver los desafíos más exigentes de la industria moderna.', 1),
+(2, 'uploads/sustainability_research.png', 'Compromiso con el Desarrollo Sostenible', 'Promovemos proyectos que cuidan el medio ambiente, optimizan los recursos hídricos y potencian las energías limpias.', 2),
+(3, 'uploads/team_collaboration.png', 'Trabajo Colaborativo e Interdisciplinario', 'Impulsamos la sinergia científica uniendo investigadores altamente calificados para crear un futuro sostenible.', 3)
+ON DUPLICATE KEY UPDATE id=id;
+

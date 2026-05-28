@@ -126,6 +126,21 @@ async function seedDatabase() {
       console.log('✔ La tabla users ya contiene administradores.');
     }
 
+    // 5. Validar carrusel de diapositivas del Hero
+    const [slides] = await connection.query('SELECT COUNT(*) as count FROM hero_slides');
+    if (slides[0].count === 0) {
+      console.log('Poblando tabla hero_slides con diapositivas semilla...');
+      await connection.query(`
+        INSERT INTO hero_slides (image_url, title, subtitle, order_index) VALUES 
+        ('uploads/hero_reasons.png', 'Investigación Científica con Impacto Real', 'Desarrollamos soluciones tecnológicas aplicadas para resolver los desafíos más exigentes de la industria moderna.', 1),
+        ('uploads/sustainability_research.png', 'Compromiso con el Desarrollo Sostenible', 'Promovemos proyectos que cuidan el medio ambiente, optimizan los recursos hídricos y potencian las energías limpias.', 2),
+        ('uploads/team_collaboration.png', 'Trabajo Colaborativo e Interdisciplinario', 'Impulsamos la sinergia científica uniendo investigadores altamente calificados para crear un futuro sostenible.', 3)
+      `);
+      console.log('✔ Diapositivas semilla creadas exitosamente.');
+    } else {
+      console.log('✔ La tabla hero_slides ya contiene diapositivas.');
+    }
+
     console.log('\x1b[32m==================================================\x1b[0m');
     console.log('\x1b[32m✔ ¡BASE DE DATOS POBLADA EXITOSAMENTE CON SEMILLAS! \x1b[0m');
     console.log('\x1b[32m==================================================\x1b[0m');

@@ -43,6 +43,7 @@ async function cleanDatabase() {
       'research_lines',
       'specific_objectives',
       'site_settings',
+      'hero_slides',
       'users'
     ];
 

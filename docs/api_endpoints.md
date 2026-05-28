@@ -104,6 +104,22 @@ Sube un nuevo logo corporativo.
     }
     ```
 
+### POST `/api/settings/slides`
+Añade una nueva diapositiva al carrusel del Hero de la página de inicio.
+*   **Acceso**: Protegido (JWT)
+*   **Cuerpo**: `multipart/form-data`
+    *   Campos de texto: `title` (opcional), `subtitle` (opcional), `order_index` (opcional).
+    *   Archivo de imagen: `image` (Imagen del slide).
+
+### PUT `/api/settings/slides/:id`
+Actualiza una diapositiva existente del carrusel del Hero.
+*   **Acceso**: Protegido (JWT)
+*   **Cuerpo**: `multipart/form-data` (Opcional `image`).
+
+### DELETE `/api/settings/slides/:id`
+Elimina una diapositiva del carrusel y borra físicamente su imagen del servidor.
+*   **Acceso**: Protegido (JWT)
+
 ---
 
 ## 3. Módulo de Investigadores (`/api/researchers`)
