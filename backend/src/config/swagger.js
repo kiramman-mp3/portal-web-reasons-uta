@@ -164,6 +164,92 @@ Permite gestionar la configuración general del portal, equipo de investigadores
           }
         }
       },
+      '/api/settings/slides': {
+        post: {
+          tags: ['Configuración Portal'],
+          summary: 'Agregar nueva diapositiva al carrusel del Hero',
+          description: 'Sube una nueva imagen y detalles para el carrusel de la página de inicio.',
+          security: [{ bearerAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              'multipart/form-data': {
+                schema: {
+                  type: 'object',
+                  required: ['image'],
+                  properties: {
+                    image: { type: 'string', format: 'binary', description: 'Imagen para la diapositiva' },
+                    title: { type: 'string', description: 'Título principal de la diapositiva' },
+                    subtitle: { type: 'string', description: 'Subtítulo o descripción corta' },
+                    order_index: { type: 'integer', description: 'Orden numérico de aparición' }
+                  }
+                }
+              }
+            }
+          },
+          responses: {
+            201: { description: 'Diapositiva creada exitosamente.' },
+            401: { description: 'No autorizado.' }
+          }
+        }
+      },
+      '/api/settings/slides/{id}': {
+        put: {
+          tags: ['Configuración Portal'],
+          summary: 'Actualizar una diapositiva del carrusel',
+          description: 'Actualiza los textos o reemplaza la imagen de una diapositiva existente.',
+          security: [{ bearerAuth: [] }],
+          parameters: [
+            {
+              name: 'id',
+              in: 'path',
+              required: true,
+              schema: { type: 'integer' },
+              description: 'ID de la diapositiva'
+            }
+          ],
+          requestBody: {
+            content: {
+              'multipart/form-data': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    image: { type: 'string', format: 'binary', description: 'Nueva imagen opcional' },
+                    title: { type: 'string', description: 'Título' },
+                    subtitle: { type: 'string', description: 'Subtítulo' },
+                    order_index: { type: 'integer', description: 'Orden numérico' }
+                  }
+                }
+              }
+            }
+          },
+          responses: {
+            200: { description: 'Diapositiva actualizada exitosamente.' },
+            401: { description: 'No autorizado.' },
+            404: { description: 'No encontrada.' }
+          }
+        },
+        delete: {
+          tags: ['Configuración Portal'],
+          summary: 'Eliminar una diapositiva del carrusel',
+          description: 'Elimina el registro de la diapositiva y borra su imagen del servidor.',
+          security: [{ bearerAuth: [] }],
+          parameters: [
+            {
+              name: 'id',
+              in: 'path',
+              required: true,
+              schema: { type: 'integer' },
+              description: 'ID de la diapositiva'
+            }
+          ],
+          responses: {
+            200: { description: 'Diapositiva eliminada exitosamente.' },
+            401: { description: 'No autorizado.' },
+            404: { description: 'No encontrada.' }
+          }
+        }
+      },
       '/api/researchers': {
         get: {
           tags: ['Investigadores'],

@@ -130,6 +130,16 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
+-- 11. Diapositivas del Carrusel del Hero (Administrables)
+CREATE TABLE IF NOT EXISTS hero_slides (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    image_url VARCHAR(255) NOT NULL,
+    title VARCHAR(255) NULL,
+    subtitle VARCHAR(255) NULL,
+    order_index INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
 -- =========================================================================
 -- DATOS INICIALES (SEMILLAS / SEEDS)
 -- =========================================================================

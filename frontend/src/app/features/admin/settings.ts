@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormArray } from '@angular/forms';
@@ -53,10 +53,15 @@ import { compressImage } from '../../core/utils/image-compressor';
                 [ngClass]="activeTab() === 'lines' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'">
           Líneas de Investigación
         </button>
+        <button (click)="activeTab.set('carousel')" 
+                class="px-5 py-3 text-sm font-bold border-b-2 transition-all"
+                [ngClass]="activeTab() === 'carousel' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'">
+          Carrusel de Portada
+        </button>
       </div>
 
       <!-- FORMULARIO PRINCIPAL -->
-      <form [formGroup]="settingsForm" (ngSubmit)="saveSettings()" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/50 shadow-premium space-y-6">
+      <form *ngIf="activeTab() !== 'carousel'" [formGroup]="settingsForm" (ngSubmit)="saveSettings()" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/50 shadow-premium space-y-6">
         
         <!-- ==================== TAB 1: INFORMACIÓN GENERAL ==================== -->
         <div *ngIf="activeTab() === 'general'" class="space-y-6 animate-scale-in">
@@ -301,6 +306,115 @@ import { compressImage } from '../../core/utils/image-compressor';
 
       </form>
 
+      <!-- ==================== TAB 5: CARRUSEL DE PORTADA ==================== -->
+      <div *ngIf="activeTab() === 'carousel'" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/50 shadow-premium space-y-6 animate-scale-in">
+        
+        <div class="border-b border-slate-100 pb-3">
+          <h3 class="text-slate-800 font-bold text-sm uppercase tracking-wider">Gestión del Carrusel de Diapositivas</h3>
+          <p class="text-slate-500 text-xs">Agrega, edita o elimina las imágenes y textos del carrusel de fondo que se muestra en la pantalla de inicio.</p>
+        </div>
+
+        <!-- Listado de Diapositivas Existentes -->
+        <div class="space-y-6">
+          <div *ngFor="let slide of slides(); let i = index" 
+               class="bg-slate-50 p-6 rounded-3xl border border-slate-100 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
+            
+            <!-- Imagen actual -->
+            <div class="w-full md:w-44 h-28 bg-slate-900 border border-slate-200/50 rounded-2xl overflow-hidden flex-shrink-0 relative shadow-inner">
+              <img [src]="'/' + slide.image_url" [alt]="slide.title" class="w-full h-full object-cover">
+              <span class="absolute top-2 left-2 px-2 py-1 bg-primary text-white text-[9px] font-bold rounded shadow-sm">
+                Diapositiva #{{ i + 1 }}
+              </span>
+            </div>
+
+            <!-- Inputs en caliente -->
+            <div class="flex-grow grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
+              <!-- Título -->
+              <div class="sm:col-span-2 space-y-1.5">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Título de la diapositiva</label>
+                <input type="text" [id]="'slide_title_' + slide.id" [value]="slide.title || ''" class="admin-input-small-white" placeholder="Ej: Ingeniería de Vanguardia">
+              </div>
+              <!-- Orden -->
+              <div class="space-y-1.5">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Orden numérico</label>
+                <input type="number" [id]="'slide_order_' + slide.id" [value]="slide.order_index || 0" class="admin-input-small-white" placeholder="Ej: 1">
+              </div>
+              <!-- Subtítulo / Descripción -->
+              <div class="sm:col-span-3 space-y-1.5">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Subtítulo / Mensaje descriptivo</label>
+                <textarea [id]="'slide_subtitle_' + slide.id" rows="2" class="admin-input-small-white resize-none" placeholder="Escriba la descripción corta...">{{ slide.subtitle || '' }}</textarea>
+              </div>
+              <!-- Reemplazar imagen -->
+              <div class="sm:col-span-3 space-y-1.5">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Reemplazar imagen de diapositiva</label>
+                <input type="file" (change)="onEditSlideFileSelected($event, slide.id)" [id]="'slide_file_' + slide.id" accept="image/*" 
+                       class="block w-full text-xs text-slate-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-primary-light file:text-primary hover:file:bg-primary-light/80 file:cursor-pointer">
+              </div>
+            </div>
+
+            <!-- Acciones de Diapositiva -->
+            <div class="flex md:flex-col gap-2 w-full md:w-auto shrink-0 justify-end pt-2 md:pt-0">
+              <button type="button" (click)="updateSlide(slide)" [disabled]="updatingSlideIds()[slide.id]"
+                      class="px-4 py-2.5 bg-primary hover:bg-primary-hover disabled:bg-slate-300 text-white text-xs font-bold rounded-xl shadow-sm transition-all flex items-center justify-center space-x-1.5 cursor-pointer">
+                <i *ngIf="updatingSlideIds()[slide.id]" class="animate-spin bi bi-arrow-repeat text-sm"></i>
+                <span>{{ updatingSlideIds()[slide.id] ? 'Guardando...' : 'Actualizar' }}</span>
+              </button>
+              <button type="button" (click)="deleteSlide(slide.id)" [disabled]="deletingSlideIds()[slide.id]"
+                      class="px-4 py-2.5 bg-red-50 hover:bg-red-100 disabled:bg-slate-100 text-red-500 text-xs font-bold rounded-xl border border-red-200/50 transition-all flex items-center justify-center space-x-1.5 cursor-pointer">
+                <i *ngIf="deletingSlideIds()[slide.id]" class="animate-spin bi bi-arrow-repeat text-sm"></i>
+                <span>{{ deletingSlideIds()[slide.id] ? 'Borrando...' : 'Eliminar' }}</span>
+              </button>
+            </div>
+
+          </div>
+
+          <div *ngIf="slides().length === 0" class="text-center py-12 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-slate-400 text-xs">
+            No hay diapositivas en el carrusel de portada. Agrega una nueva diapositiva a continuación.
+          </div>
+        </div>
+
+        <!-- Formulario Agregar Nueva Diapositiva -->
+        <div class="bg-slate-50/50 p-6 rounded-3xl border border-slate-200/50 space-y-6">
+          <h4 class="text-slate-800 font-bold text-sm uppercase tracking-wider flex items-center space-x-2">
+            <i class="bi bi-plus-circle-fill text-primary"></i>
+            <span>Cargar Nueva Diapositiva al Carrusel</span>
+          </h4>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="md:col-span-2 space-y-1.5">
+              <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Título de Diapositiva</label>
+              <input type="text" [value]="newSlideTitle()" (input)="newSlideTitle.set($any($event.target).value)" 
+                     class="admin-input-small-white" placeholder="Ej: Investigación Interdisciplinaria">
+            </div>
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Orden numérico</label>
+              <input type="number" [value]="newSlideOrder()" (input)="newSlideOrder.set(+$any($event.target).value)" 
+                     class="admin-input-small-white" placeholder="Ej: 4">
+            </div>
+            <div class="md:col-span-3 space-y-1.5">
+              <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Subtítulo / Mensaje descriptivo</label>
+              <textarea [value]="newSlideSubtitle()" (input)="newSlideSubtitle.set($any($event.target).value)" 
+                        rows="2" class="admin-input-small-white resize-none" placeholder="Describa brevemente el enfoque de esta diapositiva..."></textarea>
+            </div>
+            <div class="md:col-span-3 space-y-1.5">
+              <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Archivo de Imagen de Diapositiva *</label>
+              <input type="file" (change)="onNewSlideFileSelected($event)" id="new_slide_file" accept="image/*" 
+                     class="block w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-primary-light file:text-primary hover:file:bg-primary-light/80 file:cursor-pointer">
+              <p class="text-[10px] text-slate-400">Se recomiendan imágenes paisajísticas horizontales de alta resolución (ej: 1920x1080) de hasta 4MB.</p>
+            </div>
+          </div>
+
+          <div class="flex justify-end pt-2">
+            <button type="button" (click)="addSlide()" [disabled]="isAddingSlide() || !selectedSlideFile"
+                    class="px-6 py-3 bg-primary hover:bg-primary-hover disabled:bg-slate-300 text-white text-xs font-bold rounded-xl shadow transition-all flex items-center space-x-1.5 cursor-pointer">
+              <i *ngIf="isAddingSlide()" class="animate-spin bi bi-arrow-repeat text-sm"></i>
+              <span>{{ isAddingSlide() ? 'Cargando Diapositiva...' : 'Agregar Nueva Diapositiva' }}</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
     </div>
   `
 })
@@ -317,6 +431,20 @@ export class AdminSettingsComponent implements OnInit {
   statusMessage = signal('');
 
   selectedLogoFile: File | null = null;
+
+  // NUEVAS SEÑALES Y PROPIEDADES PARA EL CARRUSEL
+  slides = computed(() => this.config.settings()?.hero_slides || []);
+  
+  newSlideTitle = signal('');
+  newSlideSubtitle = signal('');
+  newSlideOrder = signal(0);
+  selectedSlideFile: File | null = null;
+  
+  isAddingSlide = signal(false);
+  selectedEditFiles: { [id: number]: File } = {};
+  
+  updatingSlideIds = signal<{ [id: number]: boolean }>({});
+  deletingSlideIds = signal<{ [id: number]: boolean }>({});
 
   ngOnInit() {
     this.initForm();
@@ -501,6 +629,154 @@ export class AdminSettingsComponent implements OnInit {
           this.messageStatus.set('error');
           this.statusMessage.set(err.error?.message || 'Error de conexión al guardar los datos.');
           this.isSaving.set(false);
+        }
+      });
+  }
+
+  // MÉTODOS DEL CARRUSEL DINÁMICO
+  async onNewSlideFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      try {
+        console.log('Comprimiendo nueva diapositiva...');
+        const compressed = await compressImage(file, 1920, 1080, 0.85); // Alta resolución horizontal
+        this.selectedSlideFile = compressed;
+      } catch (err) {
+        console.error('Error al comprimir diapositiva:', err);
+        this.selectedSlideFile = file;
+      }
+    }
+  }
+
+  addSlide() {
+    if (!this.selectedSlideFile) {
+      this.messageStatus.set('error');
+      this.statusMessage.set('Por favor, seleccione una imagen para la nueva diapositiva.');
+      return;
+    }
+
+    this.isAddingSlide.set(true);
+    this.messageStatus.set('idle');
+
+    const formData = new FormData();
+    formData.append('image', this.selectedSlideFile);
+    formData.append('title', this.newSlideTitle());
+    formData.append('subtitle', this.newSlideSubtitle());
+    formData.append('order_index', this.newSlideOrder().toString());
+
+    this.http.post<{ success: boolean }>('/api/settings/slides', formData)
+      .subscribe({
+        next: (res) => {
+          if (res && res.success) {
+            this.messageStatus.set('success');
+            this.statusMessage.set('Diapositiva agregada exitosamente al carrusel.');
+            this.newSlideTitle.set('');
+            this.newSlideSubtitle.set('');
+            this.newSlideOrder.set(0);
+            this.selectedSlideFile = null;
+            
+            const fileInput = document.getElementById('new_slide_file') as HTMLInputElement;
+            if (fileInput) fileInput.value = '';
+            
+            this.config.loadConfig(); // Recargar datos
+          } else {
+            this.messageStatus.set('error');
+            this.statusMessage.set('No se pudo agregar la diapositiva.');
+          }
+          this.isAddingSlide.set(false);
+        },
+        error: (err) => {
+          console.error('Error al agregar diapositiva:', err);
+          this.messageStatus.set('error');
+          this.statusMessage.set(err.error?.message || 'Error al conectar con la API de diapositivas.');
+          this.isAddingSlide.set(false);
+        }
+      });
+  }
+
+  async onEditSlideFileSelected(event: any, slideId: number) {
+    const file = event.target.files[0];
+    if (file) {
+      try {
+        console.log(`Comprimiendo imagen de reemplazo para slide ${slideId}...`);
+        const compressed = await compressImage(file, 1920, 1080, 0.85);
+        this.selectedEditFiles[slideId] = compressed;
+      } catch (err) {
+        console.error('Error al comprimir:', err);
+        this.selectedEditFiles[slideId] = file;
+      }
+    }
+  }
+
+  updateSlide(slide: any) {
+    const id = slide.id;
+    this.updatingSlideIds.update(val => ({ ...val, [id]: true }));
+    this.messageStatus.set('idle');
+
+    const titleInput = document.getElementById(`slide_title_${id}`) as HTMLInputElement;
+    const subtitleInput = document.getElementById(`slide_subtitle_${id}`) as HTMLTextAreaElement;
+    const orderInput = document.getElementById(`slide_order_${id}`) as HTMLInputElement;
+
+    const formData = new FormData();
+    if (titleInput) formData.append('title', titleInput.value);
+    if (subtitleInput) formData.append('subtitle', subtitleInput.value);
+    if (orderInput) formData.append('order_index', orderInput.value);
+    
+    if (this.selectedEditFiles[id]) {
+      formData.append('image', this.selectedEditFiles[id]);
+    }
+
+    this.http.put<{ success: boolean }>(`/api/settings/slides/${id}`, formData)
+      .subscribe({
+        next: (res) => {
+          if (res && res.success) {
+            this.messageStatus.set('success');
+            this.statusMessage.set('Diapositiva actualizada exitosamente.');
+            delete this.selectedEditFiles[id];
+            
+            const fileInput = document.getElementById(`slide_file_${id}`) as HTMLInputElement;
+            if (fileInput) fileInput.value = '';
+            
+            this.config.loadConfig(); // Recargar datos
+          } else {
+            this.messageStatus.set('error');
+            this.statusMessage.set('No se pudo actualizar la diapositiva.');
+          }
+          this.updatingSlideIds.update(val => ({ ...val, [id]: false }));
+        },
+        error: (err) => {
+          console.error('Error al actualizar slide:', err);
+          this.messageStatus.set('error');
+          this.statusMessage.set(err.error?.message || 'Error al guardar los cambios de la diapositiva.');
+          this.updatingSlideIds.update(val => ({ ...val, [id]: false }));
+        }
+      });
+  }
+
+  deleteSlide(slideId: number) {
+    if (!confirm('¿Está seguro de que desea eliminar esta diapositiva del carrusel?')) return;
+
+    this.deletingSlideIds.update(val => ({ ...val, [slideId]: true }));
+    this.messageStatus.set('idle');
+
+    this.http.delete<{ success: boolean }>(`/api/settings/slides/${slideId}`)
+      .subscribe({
+        next: (res) => {
+          if (res && res.success) {
+            this.messageStatus.set('success');
+            this.statusMessage.set('Diapositiva eliminada con éxito del carrusel.');
+            this.config.loadConfig(); // Recargar datos
+          } else {
+            this.messageStatus.set('error');
+            this.statusMessage.set('No se pudo eliminar la diapositiva.');
+          }
+          this.deletingSlideIds.update(val => ({ ...val, [slideId]: false }));
+        },
+        error: (err) => {
+          console.error('Error al eliminar slide:', err);
+          this.messageStatus.set('error');
+          this.statusMessage.set(err.error?.message || 'Error de conexión al eliminar la diapositiva.');
+          this.deletingSlideIds.update(val => ({ ...val, [slideId]: false }));
         }
       });
   }

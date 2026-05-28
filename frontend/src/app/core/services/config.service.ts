@@ -19,6 +19,7 @@ export interface SiteSettings {
   contact_email: string;
   specific_objectives?: any[];
   research_lines?: any[];
+  hero_slides?: any[];
 }
 
 @Injectable({

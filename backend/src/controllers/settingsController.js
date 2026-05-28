@@ -24,6 +24,10 @@ exports.getSettings = async (req, res) => {
     const [lineRows] = await pool.query('SELECT * FROM research_lines WHERE settings_id = 1 ORDER BY order_index ASC');
     settings.research_lines = lineRows;
 
+    // 4. Obtener diapositivas del carrusel del Hero
+    const [slideRows] = await pool.query('SELECT * FROM hero_slides ORDER BY order_index ASC');
+    settings.hero_slides = slideRows;
+
     return res.status(200).json({
       success: true,
       data: settings
@@ -186,3 +190,154 @@ exports.updateLogo = async (req, res) => {
     });
   }
 };
+
+// Agregar nueva diapositiva al carrusel
+exports.addSlide = async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({
+      success: false,
+      message: 'No se subió ninguna imagen para la diapositiva.'
+    });
+  }
+
+  const { title, subtitle, order_index } = req.body;
+  const imageUrl = 'uploads/' + req.file.filename;
+
+  try {
+    const orderIdx = parseInt(order_index) || 0;
+    const [result] = await pool.query(
+      'INSERT INTO hero_slides (image_url, title, subtitle, order_index) VALUES (?, ?, ?, ?)',
+      [imageUrl, title || '', subtitle || '', orderIdx]
+    );
+
+    return res.status(201).json({
+      success: true,
+      message: 'Diapositiva agregada exitosamente.',
+      data: {
+        id: result.insertId,
+        image_url: imageUrl,
+        title: title || '',
+        subtitle: subtitle || '',
+        order_index: orderIdx
+      }
+    });
+  } catch (error) {
+    console.error('Error al agregar diapositiva:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error interno al agregar la diapositiva.'
+    });
+  }
+};
+
+// Actualizar diapositiva existente
+exports.updateSlide = async (req, res) => {
+  const { id } = req.params;
+  const { title, subtitle, order_index } = req.body;
+
+  try {
+    // Verificar si existe la diapositiva
+    const [existing] = await pool.query('SELECT * FROM hero_slides WHERE id = ?', [id]);
+    if (existing.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No se encontró la diapositiva.'
+      });
+    }
+
+    const slide = existing[0];
+    let imageUrl = slide.image_url;
+
+    // Si se sube una nueva imagen, reemplazar y borrar la anterior
+    if (req.file) {
+      imageUrl = 'uploads/' + req.file.filename;
+      
+      const oldImage = slide.image_url;
+      // No borrar las imágenes por defecto del semillero original
+      const defaultImages = [
+        'uploads/hero_reasons.png',
+        'uploads/sustainability_research.png',
+        'uploads/team_collaboration.png'
+      ];
+      if (oldImage && !defaultImages.includes(oldImage)) {
+        const oldPath = path.join(__dirname, '../../', oldImage);
+        if (fs.existsSync(oldPath)) {
+          fs.unlinkSync(oldPath);
+        }
+      }
+    }
+
+    const orderIdx = order_index !== undefined ? parseInt(order_index) : slide.order_index;
+
+    await pool.query(
+      'UPDATE hero_slides SET image_url = ?, title = ?, subtitle = ?, order_index = ? WHERE id = ?',
+      [imageUrl, title !== undefined ? title : slide.title, subtitle !== undefined ? subtitle : slide.subtitle, orderIdx, id]
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: 'Diapositiva actualizada exitosamente.',
+      data: {
+        id: parseInt(id),
+        image_url: imageUrl,
+        title: title !== undefined ? title : slide.title,
+        subtitle: subtitle !== undefined ? subtitle : slide.subtitle,
+        order_index: orderIdx
+      }
+    });
+
+  } catch (error) {
+    console.error('Error al actualizar diapositiva:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error interno al actualizar la diapositiva.'
+    });
+  }
+};
+
+// Eliminar diapositiva del carrusel
+exports.deleteSlide = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [existing] = await pool.query('SELECT * FROM hero_slides WHERE id = ?', [id]);
+    if (existing.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No se encontró la diapositiva.'
+      });
+    }
+
+    const slide = existing[0];
+    const oldImage = slide.image_url;
+
+    // Eliminar registro
+    await pool.query('DELETE FROM hero_slides WHERE id = ?', [id]);
+
+    // Borrar la imagen física si no es por defecto
+    const defaultImages = [
+      'uploads/hero_reasons.png',
+      'uploads/sustainability_research.png',
+      'uploads/team_collaboration.png'
+    ];
+    if (oldImage && !defaultImages.includes(oldImage)) {
+      const oldPath = path.join(__dirname, '../../', oldImage);
+      if (fs.existsSync(oldPath)) {
+        fs.unlinkSync(oldPath);
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Diapositiva eliminada exitosamente del carrusel.'
+    });
+
+  } catch (error) {
+    console.error('Error al eliminar diapositiva:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error interno al eliminar la diapositiva.'
+    });
+  }
+};
+

@@ -366,7 +366,6 @@ import { ConfigService } from '../../core/services/config.service';
     body.high-contrast border, 
     body.high-contrast .border-slate-100,
     body.high-contrast .border-slate-200,
-    body.high-contrast .border-slate-200\/50,
     body.high-contrast hr {
       border-color: #ffffff !important;
     }

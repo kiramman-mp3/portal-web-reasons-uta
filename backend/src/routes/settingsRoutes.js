@@ -79,4 +79,28 @@ router.post(
   settingsController.updateLogo
 );
 
+// Gestión del Carrusel del Hero (Privado)
+// POST /api/settings/slides (Agregar diapositiva)
+router.post(
+  '/slides',
+  authMiddleware,
+  upload.single('image'),
+  settingsController.addSlide
+);
+
+// PUT /api/settings/slides/:id (Actualizar diapositiva)
+router.put(
+  '/slides/:id',
+  authMiddleware,
+  upload.single('image'),
+  settingsController.updateSlide
+);
+
+// DELETE /api/settings/slides/:id (Eliminar diapositiva)
+router.delete(
+  '/slides/:id',
+  authMiddleware,
+  settingsController.deleteSlide
+);
+
 module.exports = router;
