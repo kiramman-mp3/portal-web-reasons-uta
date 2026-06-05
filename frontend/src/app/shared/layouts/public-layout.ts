@@ -2,6 +2,7 @@ import { Component, inject, signal, ViewEncapsulation } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ConfigService } from '../../core/services/config.service';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-public-layout',
@@ -57,7 +58,7 @@ import { ConfigService } from '../../core/services/config.service';
 
             <!-- Botón de Acceso Administrativo -->
             <div class="hidden md:flex items-center">
-              <button routerLink="/admin/login" 
+              <button [routerLink]="auth.isAuthenticated() ? '/admin/dashboard' : '/admin/login'" 
                       class="px-4 py-2 border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 active:bg-slate-100 flex items-center space-x-1.5 transition-all duration-200 shadow-sm">
                 <i class="bi bi-shield-lock-fill text-primary"></i>
                 <span>Portal Administrador</span>
@@ -98,7 +99,7 @@ import { ConfigService } from '../../core/services/config.service';
               Contacto
             </a>
             <hr class="border-slate-100 my-2">
-            <button routerLink="/admin/login" (click)="closeMobileMenu()"
+            <button [routerLink]="auth.isAuthenticated() ? '/admin/dashboard' : '/admin/login'" (click)="closeMobileMenu()"
                     class="w-full px-4 py-3 bg-primary text-white rounded-lg text-base font-semibold flex items-center justify-center space-x-2 transition-all">
               <i class="bi bi-shield-lock-fill"></i>
               <span>Portal Administrador</span>
@@ -404,6 +405,7 @@ import { ConfigService } from '../../core/services/config.service';
 
 export class PublicLayoutComponent {
   config = inject(ConfigService);
+  auth = inject(AuthService);
   isMobileMenuOpen = signal(false);
 
   isAccessMenuOpen = signal(false);
