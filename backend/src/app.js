@@ -23,7 +23,16 @@ const PORT = process.env.PORT || 3000;
 
 // 2. Middlewares de Seguridad Globales
 app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" } // Permitir que Angular consuma las imágenes expuestas estáticamente
+  crossOriginResourcePolicy: { policy: "cross-origin" }, // Permitir que Angular consuma las imágenes expuestas estáticamente
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https:"],
+      imgSrc: ["'self'", "data:", "blob:"],
+      connectSrc: ["'self'"]
+    }
+  }
 }));
 
 // Habilitar CORS restrictivo para el frontend Angular (por defecto localhost:4200)
