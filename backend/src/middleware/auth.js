@@ -22,7 +22,7 @@ module.exports = (req, res, next) => {
   const token = parts[1];
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'reasons_uta_ultra_secure_jwt_secret_key_2026_!');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded; // Adjuntar el payload decodificado a la solicitud
     next();
   } catch (error) {

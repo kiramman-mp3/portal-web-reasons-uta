@@ -5,6 +5,25 @@ const path = require('path');
 const fs = require('fs');
 const swaggerUi = require('swagger-ui-express');
 
+// Cargar variables de entorno al inicio
+const envPaths = [
+  path.join(__dirname, '../.env'),
+  path.join(__dirname, '../../.env')
+];
+for (const p of envPaths) {
+  if (fs.existsSync(p)) {
+    require('dotenv').config({ path: p });
+    break;
+  }
+}
+
+// Validar variables críticas obligatorias
+if (!process.env.JWT_SECRET) {
+  console.error('\x1b[31mError Crítico: La variable de entorno JWT_SECRET no está configurada.\x1b[0m');
+  console.error('\x1b[33mEl servidor no se iniciará por razones de seguridad.\x1b[0m');
+  process.exit(1);
+}
+
 // Importar configuración de Swagger
 const swaggerSpec = require('./config/swagger');
 

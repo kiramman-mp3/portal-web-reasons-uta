@@ -29,7 +29,7 @@ exports.login = async (req, res) => {
     // 3. Generar token JWT
     const token = jwt.sign(
       { id: user.id, username: user.username, role: user.role },
-      process.env.JWT_SECRET || 'reasons_uta_ultra_secure_jwt_secret_key_2026_!',
+      process.env.JWT_SECRET,
       { expiresIn: '24h' } // Expira en 24 horas
     );
 
