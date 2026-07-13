@@ -76,6 +76,7 @@ router.post(
   '/logo',
   authMiddleware,
   upload.single('logo'),
+  upload.checkImageSignature,
   settingsController.updateLogo
 );
 
@@ -84,6 +85,7 @@ router.post(
   '/purpose-image',
   authMiddleware,
   upload.single('image'),
+  upload.checkImageSignature,
   settingsController.updatePurposeImage
 );
 
@@ -92,6 +94,7 @@ router.post(
   '/cta-image',
   authMiddleware,
   upload.single('image'),
+  upload.checkImageSignature,
   settingsController.updateCtaImage
 );
 
@@ -101,6 +104,7 @@ router.post(
   '/slides',
   authMiddleware,
   upload.single('image'),
+  upload.checkImageSignature,
   settingsController.addSlide
 );
 
@@ -109,6 +113,7 @@ router.put(
   '/slides/:id',
   authMiddleware,
   upload.single('image'),
+  upload.checkImageSignature,
   settingsController.updateSlide
 );
 

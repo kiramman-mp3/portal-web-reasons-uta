@@ -43,4 +43,54 @@ const upload = multer({
   }
 });
 
+// Middleware para validar la firma real de la imagen en disco (Magic Bytes)
+upload.checkImageSignature = async (req, res, next) => {
+  if (!req.file) {
+    return next();
+  }
+
+  try {
+    const filePath = req.file.path;
+    
+    // Leer los primeros 12 bytes del archivo
+    const buffer = Buffer.alloc(12);
+    const fd = fs.openSync(filePath, 'r');
+    fs.readSync(fd, buffer, 0, 12, 0);
+    fs.closeSync(fd);
+
+    // Verificar firmas mágicas (Magic Bytes)
+    // JPEG: FF D8 FF
+    const isJpg = buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
+    
+    // PNG: 89 50 4E 47 0D 0A 1A 0A
+    const isPng = buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4e && buffer[3] === 0x47;
+    
+    // WEBP: 'RIFF' a los 0-4 bytes y 'WEBP' a los 8-12 bytes
+    const isWebp = buffer.toString('ascii', 0, 4) === 'RIFF' && buffer.toString('ascii', 8, 12) === 'WEBP';
+
+    if (!isJpg && !isPng && !isWebp) {
+      // Eliminar el archivo físico malicioso o inválido
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+      return res.status(400).json({
+        success: false,
+        message: 'Firma de archivo inválida. El archivo subido no es una imagen real (JPEG/PNG/WEBP).'
+      });
+    }
+
+    next();
+  } catch (error) {
+    console.error('Error al validar la firma de la imagen:', error);
+    // Asegurar que el archivo sea borrado si ocurre algún error de lectura
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+    return res.status(500).json({
+      success: false,
+      message: 'Error interno al validar la integridad de la imagen.'
+    });
+  }
+};
+
 module.exports = upload;

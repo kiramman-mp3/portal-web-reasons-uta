@@ -15,6 +15,7 @@ router.post(
   '/',
   authMiddleware,
   upload.single('photo'), // Primero se procesa Multer para poblar req.body y req.file
+  upload.checkImageSignature, // Validar firma de archivo real (Magic Bytes)
   [
     body('names')
       .trim()
@@ -62,6 +63,7 @@ router.put(
   '/:id',
   authMiddleware,
   upload.single('photo'),
+  upload.checkImageSignature,
   [
     body('names')
       .trim()

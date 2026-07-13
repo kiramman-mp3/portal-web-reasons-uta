@@ -15,6 +15,7 @@ router.post(
   '/',
   authMiddleware,
   upload.single('cover'), // Multer sube la portada de la revista
+  upload.checkImageSignature, // Validar firma de archivo real (Magic Bytes)
   [
     body('title')
       .trim()
@@ -55,6 +56,7 @@ router.put(
   '/:id',
   authMiddleware,
   upload.single('cover'),
+  upload.checkImageSignature,
   [
     body('title')
       .trim()
