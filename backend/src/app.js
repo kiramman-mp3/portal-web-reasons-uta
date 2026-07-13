@@ -104,6 +104,14 @@ app.use((err, req, res, next) => {
     });
   }
 
+  // Si es un error de Multer debido al filtro de tipo de formato
+  if (err.message && err.message.includes('Formato de archivo no soportado')) {
+    return res.status(400).json({
+      success: false,
+      message: err.message
+    });
+  }
+
   return res.status(err.status || 500).json({
     success: false,
     message: err.message || 'Ocurrió un error inesperado en el servidor.'
