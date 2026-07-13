@@ -4,6 +4,7 @@ const helmet = require('helmet');
 const path = require('path');
 const fs = require('fs');
 const swaggerUi = require('swagger-ui-express');
+const pool = require('./config/db');
 
 // Cargar variables de entorno al inicio
 const envPaths = [
@@ -118,12 +119,26 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 8. Inicializar servidor
-app.listen(PORT, () => {
-  console.log('==================================================');
-  console.log(`🚀 SERVIDOR REST CORRIENDO EN PUERTO: ${PORT}`);
-  console.log(`📝 DOCUMENTACIÓN INTERACTIVA (SWAGGER): http://localhost:${PORT}/api-docs`);
-  console.log('==================================================');
-});
+// 8. Inicializar servidor con verificación de base de datos
+async function startServer() {
+  try {
+    console.log('Probando conectividad con base de datos MySQL...');
+    await pool.query('SELECT 1');
+    console.log('\x1b[32m✔ Conexión exitosa a la base de datos MySQL.\x1b[0m');
+
+    app.listen(PORT, () => {
+      console.log('==================================================');
+      console.log(`🚀 SERVIDOR REST CORRIENDO EN PUERTO: ${PORT}`);
+      console.log(`📝 DOCUMENTACIÓN INTERACTIVA (SWAGGER): http://localhost:${PORT}/api-docs`);
+      console.log('==================================================');
+    });
+  } catch (err) {
+    console.error('\x1b[31m✖ Error crítico al iniciar servidor: No se pudo conectar a MySQL.\x1b[0m');
+    console.error('\x1b[33mDetalles:\x1b[0m', err.message);
+    process.exit(1);
+  }
+}
+
+startServer();
 
 module.exports = app;
