@@ -35,23 +35,23 @@ import { AuthService } from '../../core/services/auth.service';
             <!-- Menú Navegación Escritorio -->
             <div class="hidden md:flex items-center space-x-1">
               <a routerLink="/" routerLinkActive="active-nav" [routerLinkActiveOptions]="{exact: true}" 
-                 class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-primary hover:bg-slate-50 transition-all duration-200">
+                 class="w-28 py-2 rounded-lg text-sm font-semibold text-center text-slate-600 hover:text-primary hover:bg-slate-50 transition-all duration-200">
                 Inicio
               </a>
               <a routerLink="/equipo" routerLinkActive="active-nav" 
-                 class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-primary hover:bg-slate-50 transition-all duration-200">
+                 class="w-28 py-2 rounded-lg text-sm font-semibold text-center text-slate-600 hover:text-primary hover:bg-slate-50 transition-all duration-200">
                 Equipo
               </a>
               <a routerLink="/proyectos" routerLinkActive="active-nav" 
-                 class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-primary hover:bg-slate-50 transition-all duration-200">
+                 class="w-28 py-2 rounded-lg text-sm font-semibold text-center text-slate-600 hover:text-primary hover:bg-slate-50 transition-all duration-200">
                 Proyectos
               </a>
               <a routerLink="/publicaciones" routerLinkActive="active-nav" 
-                 class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-primary hover:bg-slate-50 transition-all duration-200">
+                 class="w-28 py-2 rounded-lg text-sm font-semibold text-center text-slate-600 hover:text-primary hover:bg-slate-50 transition-all duration-200">
                 Publicaciones
               </a>
               <a routerLink="/contacto" routerLinkActive="active-nav" 
-                 class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-primary hover:bg-slate-50 transition-all duration-200">
+                 class="w-28 py-2 rounded-lg text-sm font-semibold text-center text-slate-600 hover:text-primary hover:bg-slate-50 transition-all duration-200">
                 Contacto
               </a>
             </div>
